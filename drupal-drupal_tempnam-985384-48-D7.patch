@@ -1,0 +1,57 @@
+diff --git a/includes/file.inc b/includes/file.inc
+index 95bb658..bb436ed 100644
+--- a/includes/file.inc
++++ b/includes/file.inc
+@@ -2544,10 +2544,10 @@ function drupal_tempnam($directory, $prefix) {
+   $scheme = file_uri_scheme($directory);
+ 
+   if ($scheme && file_stream_wrapper_valid_scheme($scheme)) {
+-    $wrapper = file_stream_wrapper_get_instance_by_scheme($scheme);
++    $local_directory = drupal_realpath($directory);
+ 
+-    if ($filename = tempnam($wrapper->getDirectoryPath(), $prefix)) {
+-      return $scheme . '://' . drupal_basename($filename);
++    if (is_writable($local_directory) && ($filename = tempnam($local_directory, $prefix))) {
++      return file_stream_wrapper_uri_normalize($directory . '/' . basename($filename));
+     }
+     else {
+       return FALSE;
+diff --git a/modules/simpletest/tests/file.test b/modules/simpletest/tests/file.test
+index 032f2cb..f33264e 100644
+--- a/modules/simpletest/tests/file.test
++++ b/modules/simpletest/tests/file.test
+@@ -2708,7 +2708,7 @@ class FileMimeTypeTest extends DrupalWebTestCase {
+ /**
+  * Tests stream wrapper functions.
+  */
+-class StreamWrapperTest extends DrupalWebTestCase {
++class StreamWrapperTest extends FileTestCase {
+ 
+   protected $scheme = 'dummy';
+   protected $classname = 'DrupalDummyStreamWrapper';
+@@ -2785,6 +2785,25 @@ class StreamWrapperTest extends DrupalWebTestCase {
+   }
+ 
+   /**
++   * Test drupal_tempnam().
++   *
++   * Ensure that drupal_tempnam() can create files in a folder when using a
++   * stream wrapper.
++   */
++  function testDrupalTempnam() {
++    // Create a tmp file at the root of the default stream wrapper.
++    $tempnam = drupal_tempnam(file_default_scheme() . '://', 'tmp');
++    $this->assertTrue($tempnam, t('Default stream wrapper can create temporary files'));
++    $this->assertEqual(file_default_scheme() . '://tmp', substr($tempnam, 0, strlen(file_default_scheme() . '://tmp')), t('Temporary file created at root of stream wrapper with correct URI'));
++
++    // Create a tmp file in a subfolder of the default stream wrapper.
++    $folder = $this->createDirectory();
++    $tempnam = drupal_tempnam($folder, 'tmp');
++    $this->assertTrue($tempnam, t('Default stream wrapper can create temporary files'));
++    $this->assertEqual($folder, drupal_dirname($tempnam), t('Temporary file in subdirectory of stream wrapper was created'));
++  }
++
++  /**
+    * Tests that phar stream wrapper is registered as expected.
+    *
+    * @see file_get_stream_wrappers()

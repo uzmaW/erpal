@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * @file
+ * Code for the testerpalfeatures feature.
+ */
+
+include_once 'testerpalfeatures.features.inc';

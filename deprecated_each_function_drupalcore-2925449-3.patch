@@ -1,0 +1,84 @@
+diff --git a/includes/bootstrap.inc b/includes/bootstrap.inc
+index a00b6a26..8d621257 100644
+--- a/includes/bootstrap.inc
++++ b/includes/bootstrap.inc
+@@ -3779,7 +3779,7 @@ function _drupal_shutdown_function() {
+   chdir(DRUPAL_ROOT);
+ 
+   try {
+-    while (list($key, $callback) = each($callbacks)) {
++    foreach($callbacks as $key => $callback) {
+       call_user_func_array($callback['callback'], $callback['arguments']);
+     }
+   }
+diff --git a/includes/install.inc b/includes/install.inc
+index 5e1d3c63..e864de56 100644
+--- a/includes/install.inc
++++ b/includes/install.inc
+@@ -779,7 +779,7 @@ function drupal_uninstall_modules($module_list = array(), $uninstall_dependents
+     $module_list = array_flip(array_values($module_list));
+ 
+     $profile = drupal_get_profile();
+-    while (list($module) = each($module_list)) {
++    foreach($module_list as $module) {
+       if (!isset($module_data[$module]) || drupal_get_installed_schema_version($module) == SCHEMA_UNINSTALLED) {
+         // This module doesn't exist or is already uninstalled. Skip it.
+         unset($module_list[$module]);
+diff --git a/includes/menu.inc b/includes/menu.inc
+index 4664d27e..97d97dbb 100644
+--- a/includes/menu.inc
++++ b/includes/menu.inc
+@@ -576,7 +576,9 @@ function _menu_load_objects(&$item, &$map) {
+           // 'load arguments' in the hook_menu() entry, but they need
+           // some processing. In this case the $function is the key to the
+           // load_function array, and the value is the list of arguments.
+-          list($function, $args) = each($function);
++          $function = key($function);
++          $args = current($function);
++          next($function);
+           $load_functions[$index] = $function;
+ 
+           // Some arguments are placeholders for dynamic items to process.
+@@ -2402,7 +2404,8 @@ function menu_set_active_trail($new_trail = NULL) {
+       // a stripped down menu tree containing the active trail only, in case
+       // the given menu has not been built in this request yet.
+       $tree = menu_tree_page_data($preferred_link['menu_name'], NULL, TRUE);
+-      list($key, $curr) = each($tree);
++      $key = key($tree);
++      $curr = current($tree);
+     }
+     // There is no link for the current path.
+     else {
+@@ -2432,7 +2435,9 @@ function menu_set_active_trail($new_trail = NULL) {
+         }
+         $tree = $curr['below'] ? $curr['below'] : array();
+       }
+-      list($key, $curr) = each($tree);
++      $key = key($tree);
++      $curr = current($tree);
++      next($tree);
+     }
+     // Make sure the current page is in the trail to build the page title, by
+     // appending either the preferred link or the menu router item for the
+diff --git a/includes/module.inc b/includes/module.inc
+index 2e251080..9bfc88e8 100644
+--- a/includes/module.inc
++++ b/includes/module.inc
+@@ -404,7 +404,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
+     // Create an associative array with weights as values.
+     $module_list = array_flip(array_values($module_list));
+ 
+-    while (list($module) = each($module_list)) {
++    foreach($module_list as $module) {
+       if (!isset($module_data[$module])) {
+         // This module is not found in the filesystem, abort.
+         return FALSE;
+@@ -540,7 +540,7 @@ function module_disable($module_list, $disable_dependents = TRUE) {
+     $module_list = array_flip(array_values($module_list));
+ 
+     $profile = drupal_get_profile();
+-    while (list($module) = each($module_list)) {
++    foreach($module_list as $module) {
+       if (!isset($module_data[$module]) || !$module_data[$module]->status) {
+         // This module doesn't exist or is already disabled, skip it.
+         unset($module_list[$module]);

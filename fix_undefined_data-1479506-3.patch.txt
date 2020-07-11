@@ -1,0 +1,20 @@
+diff --git a/widgets.admin.inc b/widgets.admin.inc
+index 13999ce..1ac20f8 100644
+--- a/widgets.admin.inc
++++ b/widgets.admin.inc
+@@ -847,7 +847,7 @@ function widgets_definition_list() {
+   $page['widgets_definition_list'] = array(
+     '#markup' => theme('widgets_definition_list', array('definitions' => $definitions)),
+     '#attached' => array(
+-      'css' => array(drupal_get_path('module', 'widgets') . '/widgets.admin.css' => array(), array('attributes' => array('target' => '_blank'))),
++      'css' => array(drupal_get_path('module', 'widgets') . '/widgets.admin.css' => array('attributes' => array('target' => '_blank'))),
+     ),
+   );
+ 
+@@ -1260,4 +1260,4 @@ function theme_widgets_definition_list($variables) {
+   }
+ 
+   return theme('table', array('header' => $header, 'rows' => $rows));
+-}
+\ No newline at end of file
++}
